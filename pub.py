@@ -14,12 +14,25 @@ torBaseDir = "/usr/local/var/lib/tor/hidden_service"
 config = configparser.RawConfigParser()
 config.read('liquid.conf')
 
-rpcHost = config.get('LIQUID', 'host')
-rpcPort = config.get('LIQUID', 'port')
-rpcUser = config.get('LIQUID', 'username')
-rpcPassword = config.get('LIQUID', 'password')
-rpcPassphrase = config.get('LIQUID', 'passphrase')
-serverURL = 'http://' + rpcUser + ':' + rpcPassword + '@'+rpcHost+':' + str(rpcPort)
+admin = config.get('GENERAL', 'admin') == "True"
+liquid_instance = config.get('GENERAL', 'liquid_instance')
+username = config.get('GENERAL', 'username')
+password = config.get('GENERAL', 'password')
+
+rpcHost = config.get(liquid_instance, 'host')
+rpcPort = config.get(liquid_instance, 'port')
+rpcUser = config.get(liquid_instance, 'username')
+rpcPassword = config.get(liquid_instance, 'password')
+rpcPassphrase = config.get(liquid_instance, 'passphrase')
+rpcWallet = config.get(liquid_instance, 'wallet')
+rpcVersion = config.get(liquid_instance, 'version')
+rpcChain = config.get(liquid_instance, 'chain')
+policyasset = config.get(liquid_instance, 'policyasset')
+
+if (len(rpcWallet) > 0):
+    serverURL = 'http://' + rpcUser + ':' + rpcPassword + '@'+rpcHost+':' + str(rpcPort) + '/wallet/' + rpcWallet
+else:
+    serverURL = 'http://' + rpcUser + ':' + rpcPassword + '@'+rpcHost+':' + str(rpcPort)
 
 host = RPCHost(serverURL)
 if (len(rpcPassphrase) > 0):
@@ -33,10 +46,13 @@ def home():
         }
         return render_template('login', **data)
     else:
+        command = ""
+        action = ""
         result = ""
         if request.method == 'POST':
-            command = request.form.get('command')
-            action = request.form.get('action')
+            if admin:
+                command = request.form.get('command')
+                action = request.form.get('action')
 
             if command == 'linux':
                 if action == 'stop':
@@ -69,12 +85,13 @@ def home():
             'torStatus': os.popen("systemctl is-active tor").read(),
             'liquidStatus': os.popen("systemctl is-active liquid").read(),
             'result' : result,
+            'admin' : admin,
         }
         return render_template('home', **data)
 
 @app.route('/login', methods = ['POST'])
 def do_admin_login():
-    if request.form['password'] == 'password' and request.form['username'] == 'admin':
+    if request.form['password'] == password and request.form['username'] == username:
         session['logged_in'] = True
     else:
         flash('wrong password!')
@@ -84,6 +101,26 @@ def do_admin_login():
 def logout():
     session['logged_in'] = False
     return home()
+
+@app.route('/tx', methods = ['GET'])
+def tx():
+    if not session.get('logged_in'):
+        data = {
+        }
+        return render_template('login', **data)
+    else:
+        result = "ERR"
+
+        if request.method == 'GET':
+            tx = request.args.get('hex')
+            print(tx)
+            result = host.call('gettransaction', tx, True)
+
+        data = {
+            'tx' : tx,
+            'results' : json.dumps(result, indent=4, sort_keys=True),
+        }
+        return render_template('tx', **data)
 
 
 @app.route('/lbtc', methods = ['GET', 'POST'])
@@ -113,6 +150,8 @@ def lbtc():
                         result = "Sent "+str(amount)+" LBTC to address "+address+" with transaction "+tx+"."
                     else:
                         result = "ERR"
+                if action == 'generate':
+                    result = "ERR"
 
         balances = host.call('getbalance')
 
@@ -122,6 +161,9 @@ def lbtc():
             'balances' : balances,
             'result' : result,
         }
+        if (rpcChain=='regtest'):
+            data['generate'] = True
+
         return render_template('lbtc', **data)
 
 @app.route('/asset',  methods = ['GET', 'POST'])
@@ -150,6 +192,7 @@ def asset():
             item={}
             item['tx'] = tx['txid'][:8]+"..."
             item['transaction'] = tx['txid']
+            item['transaction_url'] = "./tx?hex="+tx['txid']
             item['asset'] = tx['asset']
             item['amount'] = tx['amount']
             item['actual'] = 0
@@ -157,9 +200,9 @@ def asset():
                 item['actual'] = balances[item['asset']]
             except:
                 print('error')
-            if item['amount'] > 0 and item['asset'] != "6f0279e9ed041c3d710a9f57d0c02928416460c4b722ae3457a11eec381c526d":
+            if item['amount'] > 0 and item['asset'] != policyasset:
                 assets_received.append(item)
-            if item['amount'] < 0 and item['asset'] != "6f0279e9ed041c3d710a9f57d0c02928416460c4b722ae3457a11eec381c526d":
+            if item['amount'] < 0 and item['asset'] != policyasset:
                 assets_sent.append(item)
 
         command = request.form.get('command')

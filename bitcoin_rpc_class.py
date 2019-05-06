@@ -2,11 +2,15 @@
 #    Based on open source code
 
 from __future__ import print_function
-import time, requests, json
+import time, requests, json, re
 
 class RPCHost(object):
     def __init__(self, url):
         self._session = requests.Session()
+        if re.match(r'.*\.onion/*.*', url):
+            self._session.proxies = {}
+            self._session.proxies['http'] = 'socks5h://localhost:9050'
+            self._session.proxies['https'] = 'socks5h://localhost:9050'
         self._url = url
         self._headers = {'content-type': 'application/json'}
 
