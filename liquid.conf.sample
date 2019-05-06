@@ -1,0 +1,9 @@
+[LIQUID]
+host: 127.0.0.1
+port: 7041
+username: admin
+password: password
+wallet: wallet.dat
+passphrase:
+version: 0.17
+chain: mainnet

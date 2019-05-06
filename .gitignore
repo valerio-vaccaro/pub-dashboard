@@ -1,0 +1,6 @@
+liquid.conf
+*.pyc
+venv
+venv3
+__pycache__
+.DS_Store
