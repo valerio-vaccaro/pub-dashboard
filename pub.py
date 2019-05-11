@@ -9,7 +9,7 @@ import json
 
 app = Flask(__name__, static_url_path='/static')
 qrcode = QRcode(app)
-torBaseDir = "/usr/local/var/lib/tor/hidden_service"
+torBaseDir = "/var/lib/tor/hidden_service"
 
 config = configparser.RawConfigParser()
 config.read('liquid.conf')
