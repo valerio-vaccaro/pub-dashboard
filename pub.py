@@ -151,7 +151,7 @@ def lbtc():
                     else:
                         result = "ERR"
                 if action == 'generate':
-                    result = "ERR"
+                    result = host.call('generate', 1)
 
         balances = host.call('getbalance')
 
