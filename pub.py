@@ -9,7 +9,7 @@ import json
 
 app = Flask(__name__, static_url_path='/static')
 qrcode = QRcode(app)
-torBaseDir = "/usr/local/var/lib/tor/hidden_service"
+torBaseDir = "/var/lib/tor/hidden_service"
 
 config = configparser.RawConfigParser()
 config.read('liquid.conf')
@@ -59,11 +59,11 @@ def home():
                     status = os.popen("halt -t now").read()
             elif command == 'liquid':
                 if action == 'start':
-                    status = os.popen("systemctl start liquid").read()
+                    status = os.popen("systemctl start liquidd").read()
                 elif action == 'stop':
-                    status = os.popen("systemctl stop liquid").read()
+                    status = os.popen("systemctl stop liquidd").read()
                 elif action == 'restart':
-                    status = os.popen("systemctl restart liquid").read()
+                    status = os.popen("systemctl restart liquidd").read()
             elif command == 'tor':
                 if action == 'start':
                     status = os.popen("systemctl start tor").read()
@@ -83,7 +83,7 @@ def home():
             'uptime': os.popen("uptime").read(),
             'uname': os.popen("uname -a").read(),
             'torStatus': os.popen("systemctl is-active tor").read(),
-            'liquidStatus': os.popen("systemctl is-active liquid").read(),
+            'liquidStatus': os.popen("systemctl is-active liquidd").read(),
             'result' : result,
             'admin' : admin,
         }
