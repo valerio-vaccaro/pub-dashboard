@@ -114,7 +114,7 @@ def tx():
         if request.method == 'GET':
             tx = request.args.get('hex')
             print(tx)
-            result = host.call('gettransaction', tx, True)
+            result = host.call('getrawtransaction', tx, True)
 
         data = {
             'tx' : tx,
@@ -139,8 +139,9 @@ def lbtc():
 
             if command == 'address':
                 if action == 'new':
-                    newaddress = host.call('validateaddress', host.call('getnewaddress'))['address']
-                    qrcodeaddress = qrcode(newaddress)
+                    address = host.call('validateaddress', host.call('getnewaddress'))
+                    newaddress = address
+                    qrcodeaddress = qrcode(address['address'])
             elif command == 'lbtc':
                 if action == 'send':
                     address = request.form.get('address')
