@@ -122,6 +122,52 @@ def tx():
         }
         return render_template('tx', **data)
 
+@app.route('/blocks', methods = ['GET'])
+def blocks():
+    if not session.get('logged_in'):
+        data = {
+        }
+        return render_template('login', **data)
+    else:
+        result = "ERR"
+
+        max = host.call('getblockcount')
+        min = max-10
+
+        results = []
+
+        for i in range (max, min, -1):
+            print(i)
+            hash = host.call('getblockhash', i)
+            block = host.call('getblock', hash)
+            results.append({'id':i, 'hash':hash, 'size':block['size'], 'time':block['time'], 'nTx':block['nTx']})
+
+        data = {
+            'results' : results,
+        }
+        return render_template('blocks', **data)
+
+@app.route('/block', methods = ['GET'])
+def block():
+    if not session.get('logged_in'):
+        data = {
+        }
+        return render_template('login', **data)
+    else:
+        result = "ERR"
+
+        if request.method == 'GET':
+            height = request.args.get('height')
+            print(height)
+            id = host.call('getblockhash', int(height))
+            result = host.call('getblock', id, 2)
+
+        data = {
+            'tx' : id,
+            'results' : json.dumps(result, indent=4, sort_keys=True),
+        }
+        return render_template('block', **data)
+
 
 @app.route('/lbtc', methods = ['GET', 'POST'])
 def lbtc():
@@ -151,16 +197,21 @@ def lbtc():
                         result = "Sent "+str(amount)+" LBTC to address "+address+" with transaction "+tx+"."
                     else:
                         result = "ERR"
-                if action == 'generate':
+                elif action == 'generate':
                     result = host.call('generate', 1)
+                elif action ==  'broadcast':
+                    tx = request.form.get('tx')
+                    result = host.call('sendrawtransaction', tx)
 
         balances = host.call('getbalance')
+        wallets = host.call('listwallets')
 
         data = {
             'newaddress' : newaddress,
             'newaddress_qr' : qrcodeaddress,
             'balances' : balances,
             'result' : result,
+            'wallets' : wallets,
         }
         if (rpcChain=='regtest'):
             data['generate'] = True

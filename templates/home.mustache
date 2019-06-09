@@ -47,9 +47,8 @@
                {{/admin}}
 
                <h3>Liquid Status</h3>
-               <p>{{info.headers}} headers and {{info.blocks}} downloaded blocks.</p>
+               <p><span class="badge badge-primary">{{liquidStatus}}</span> with {{info.headers}} headers and <a href="blocks">{{info.blocks}} downloaded blocks</a>.</p>
                {{#admin}}
-               <p><span class="badge badge-primary">{{liquidStatus}}</span> with {{info.headers}} headers and {{info.blocks}} downloaded blocks.</p>
                <div class="form-group row">
                   <form action="/" method="post">
                   <input type="hidden" id="command" name="command" value="liquid">
@@ -63,9 +62,8 @@
                {{/admin}}
 
                <h3>TOR</h3>
-               <p>Address {{torAddr}}</p>
-               {{#admin}}
                <p><span class="badge badge-primary">{{torStatus}}</span> with address {{torAddr}}</p>
+               {{#admin}}
                <div class="form-group row">
                   <form action="/" method="post">
                   <input type="hidden" id="command" name="command" value="tor">

@@ -34,6 +34,7 @@
             <div class="well">
               <h3>Balance</h3>
               <p>Liquid BTC: {{balances.bitcoin}}</p>
+              {{wallets}}
               {{#generate}}
               <form action="/lbtc" method="post">
                   <input type="hidden" id="command" name="command" value="lbtc">
@@ -44,10 +45,15 @@
                   </div>
                </form>
               {{/generate}}
-              <h3>New address</h3>
-              <p>{{newaddress}}</p>
-              <center><img src="{{newaddress_qr}}"></center>
 
+              <h3>New address</h3>
+              {{#newaddress}}
+              <center><img src="{{newaddress_qr}}"></center> <br/>
+              <p>Confidential address: {{newaddress.address}}</p>
+              <p>ScriptPubKey: {{newaddress.scriptPubKey}}</p>
+              <p>Unconfidential address: {{newaddress.unconfidential}}</p>
+              <p>Confidential key: {{newaddress.confidential_key}}</p>
+              {{/newaddress}}
               <div class="form-group row">
                  <form action="/lbtc" method="post">
                  <input type="hidden" id="command" name="command" value="address">
@@ -78,6 +84,22 @@
                      </div>
                   </div>
                </form>
+
+               <h3>Broadcast raw transactions</h3>
+               <form action="/lbtc" method="post">
+                   <input type="hidden" id="command" name="command" value="lbtc">
+                   <div class="form-group row">
+                      <label for="tx" class="col-sm-2 col-form-label">Transaction in hex</label>
+                      <div class="col-sm-10">
+                         <textarea rows = "5" type="text" class="form-control" name="tx" required="required" id="tx" placeholder="tx"></textarea>
+                      </div>
+                   </div>
+                   <div class="form-group row">
+                      <div class="col-sm-10">
+                         <button type="submit" class="btn btn-warning" name="action" value="broadcast">Broadcast</button>
+                      </div>
+                   </div>
+                </form>
 
               {{result}}
 

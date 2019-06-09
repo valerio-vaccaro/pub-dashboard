@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8">
+      <meta name="description" content="Liquid.beer">
+      <meta name="author" content="Drunkoshi Franziskanoto">
+      <link rel="icon" href="">
+      <title>Pub</title>
+      <link href="/static/bootstrap.min.css" rel="stylesheet">
+      <style type="text/css" style="display: none !important;">
+         div#sl{
+         width: 80%;
+         margin: 0 auto;
+         }
+      </style>
+   </head>
+   <body>
+      <nav class="navbar navbar-inverse navbar-fixed-top">
+         <div class="container">
+           <a class="navbar-brand navbar-right" href="/logout">Log out</a>
+           <div class="navbar-header">
+             <a class="navbar-brand" href="/">Home</a>
+             <a class="navbar-brand" href="/lbtc">LBTC</a>
+             <a class="navbar-brand" href="/asset">Asset</a>
+             <a class="navbar-brand" href="/about">Credits</a>
+           </div>
+         </div>
+      </nav>
+
+      <div class="container-fluid">
+         <br/><br/><br/><br/>
+         <div id="sl">
+            <br/><br/>
+            <div class="well">
+              <h3>Last blocks</h3>
+              <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Height</th>
+                  <th scope="col">Block hash</th>
+                  <th scope="col">Size</th>
+                  <th scope="col">Timestamp</th>
+                  <th scope="col">Transaction no.</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{#results}}
+                <tr>
+                  <td><a href="block?height={{id}}">{{id}}</a></td>
+                  <td>{{hash}}</td>
+                  <td>{{size}}</td>
+                  <td>{{time}}</td>
+                  <td>{{nTx}}</td>
+                </tr>
+                {{/results}}
+              </tbody>
+            </table>
+
+                 {{result}}
+                </div>
+         </div>
+      </div>
+      </div>
+      <script src="/static/jquery.min.js"></script>
+      <script src="/static/bootstrap.min.js"></script>
+   </body>
+</html>
