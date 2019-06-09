@@ -179,6 +179,20 @@ def lbtc():
         newaddress = ""
         qrcodeaddress = ""
         result = ""
+        assets_sent=[]
+        assets_received=[]
+        txs = host.call('listtransactions', '*', 1000000)
+        for tx in txs:
+            item={}
+            item['tx'] = tx['txid'][:8]+"..."
+            item['transaction'] = tx['txid']
+            item['transaction_url'] = "./tx?hex="+tx['txid']
+            item['asset'] = tx['asset']
+            item['amount'] = tx['amount']
+            if item['amount'] > 0 and item['asset'] == policyasset :
+                assets_received.append(item)
+            if item['amount'] < 0 and item['asset'] == policyasset :
+                assets_sent.append(item)
         if request.method == 'POST':
             command = request.form.get('command')
             action = request.form.get('action')
@@ -207,6 +221,8 @@ def lbtc():
         wallets = host.call('listwallets')
 
         data = {
+            'assets_received' : assets_received,
+            'assets_sent' : assets_sent,
             'newaddress' : newaddress,
             'newaddress_qr' : qrcodeaddress,
             'balances' : balances,
@@ -239,7 +255,7 @@ def asset():
             except:
                 print("ERR")
             results.append(item)
-        txs = host.call('listtransactions')
+        txs = host.call('listtransactions', '*', 1000000)
         for tx in txs:
             item={}
             item['tx'] = tx['txid'][:8]+"..."
@@ -252,9 +268,9 @@ def asset():
                 item['actual'] = balances[item['asset']]
             except:
                 print('error')
-            if item['amount'] > 0 and item['asset'] != policyasset:
+            if item['amount'] > 0 and item['asset'] != policyasset and item['asset'] != '0000000000000000000000000000000000000000000000000000000000000000':
                 assets_received.append(item)
-            if item['amount'] < 0 and item['asset'] != policyasset:
+            if item['amount'] < 0 and item['asset'] != policyasset and item['asset'] != '0000000000000000000000000000000000000000000000000000000000000000':
                 assets_sent.append(item)
 
         command = request.form.get('command')
@@ -262,9 +278,10 @@ def asset():
         result = ""
         if command == 'asset':
             if action == 'create':
-                amount = request.form.get('amount')
-                tx = host.call('issueasset', amount, 1)
-                result = "Generate "+str(amount)+" of asset "+tx['asset']+"."
+                asset_amount = request.form.get('asset_amount')
+                token_amount = request.form.get('token_amount')
+                tx = host.call('issueasset', asset_amount, token_amount)
+                result = "Generate "+str(asset_amount)+" of asset "+tx['asset']+" and "+str(token_amount)+" of reissuance tokens"+tx['token']+"."
             if action == 'send':
                 address = request.form.get('address')
                 asset = request.form.get('asset')
