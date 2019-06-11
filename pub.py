@@ -253,18 +253,20 @@ def asset():
         return render_template('login', **data)
     else:
 
-        results=[]
-        assets_sent=[]
-        assets_received=[]
+        results = []
+        assets_sent = []
+        assets_received = []
+        res = {}
 
         command = request.form.get('command')
         action = request.form.get('action')
         result = ""
         if command == 'asset':
             if action == 'create':
-                res = {}
                 asset_amount = request.form.get('asset_amount')
+                asset_address = host.call('getnewaddress')
                 token_amount = request.form.get('token_amount')
+                token_address = host.call('getnewaddress')
                 issuer_pubkey = request.form.get('pubkey')
                 name = request.form.get('name')
                 ticker = request.form.get('ticker')
@@ -297,7 +299,8 @@ def asset():
                 res['contract_hash'] = contract_hash
                 # Create the rawissuance transaction
                 contract_hash_rev = wally.hex_from_bytes(wally.hex_to_bytes(contract_hash)[::-1])
-                rawissue = host.call('rawissueasset', funded['hex'], [{'asset_amount':amount, 'asset_address':asset_address, 'token_amount':reissuance_amount, 'token_address':reissuance_token_address, 'blind':blind, 'contract_hash':contract_hash_rev}])
+                rawissue = host.call('rawissueasset', funded['hex'], [{'asset_amount':asset_amount, 'asset_address':asset_address, 'token_amount':token_amount, 'token_address':token_address, 'blind':blind, 'contract_hash':contract_hash_rev}])
+
                 # Blind the transaction
                 blind = host.call('blindrawtransaction', rawissue[0]['hex'], True, [], False)
                 # Sign transaction
@@ -356,6 +359,7 @@ def asset():
                 assets_sent.append(item)
 
         data = {
+            'issuance' : res,
             'balances' : balances,
             'results': results,
             'assets_sent': assets_sent,
