@@ -172,8 +172,9 @@ def block():
             result = host.call('getblock', id, 2)
 
         data = {
-            'tx' : id,
+            'block' : id,
             'results' : json.dumps(result, indent=4, sort_keys=True),
+            'tx' : result['tx'],
         }
 
         return render_template('block', **data)
@@ -263,9 +264,9 @@ def asset():
         result = ""
         if command == 'asset':
             if action == 'create':
-                asset_amount = request.form.get('asset_amount')
+                asset_amount = float(request.form.get('asset_amount'))
                 asset_address = host.call('getnewaddress')
-                token_amount = request.form.get('token_amount')
+                token_amount = float(request.form.get('token_amount'))
                 token_address = host.call('getnewaddress')
                 issuer_pubkey = request.form.get('pubkey')
                 name = request.form.get('name')
@@ -300,7 +301,6 @@ def asset():
                 # Create the rawissuance transaction
                 contract_hash_rev = wally.hex_from_bytes(wally.hex_to_bytes(contract_hash)[::-1])
                 rawissue = host.call('rawissueasset', funded['hex'], [{'asset_amount':asset_amount, 'asset_address':asset_address, 'token_amount':token_amount, 'token_address':token_address, 'blind':blind, 'contract_hash':contract_hash_rev}])
-
                 # Blind the transaction
                 blind = host.call('blindrawtransaction', rawissue[0]['hex'], True, [], False)
                 # Sign transaction
@@ -309,15 +309,11 @@ def asset():
                 res['decoded_raw_transaction'] = decoded
                 res['raw_transaction'] = signed['hex']
                 # Test transaction
-                test = hos1.call('testmempoolaccept', [signed['hex']])
+                test = host.call('testmempoolaccept', [signed['hex']])
                 res['testmempoolaccept'] = str(test)
                 if test[0]['allowed'] is True:
                     txid = host.call('sendrawtransaction', signed['hex'])
                     res['txid'] = txid
-                    # Import issuance blinding key in the second signer
-                    issuanceblindingkey = host_1.call('dumpissuanceblindingkey', txid, 0)
-                    host_2.call('importissuanceblindingkey', txid, 0, issuanceblindingkey)
-                    res['issuanceblindingkey'] = issuanceblindingkey
                     res['registry'] = {'asset_id': res['asset_id'], 'contract': json.loads(res['contract']), 'issuance_txin': {'txid': res['txid'], 'vin':0}}
             if action == 'send':
                 address = request.form.get('address')

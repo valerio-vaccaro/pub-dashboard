@@ -30,10 +30,13 @@
          <div id="sl">
             <br/><br/>
             <div class="well">
-               <h3>Block {{tx}}</h3>
+               <h3>Block {{block}}</h3>
                <pre><code>
 {{results}}
                </code></pre>
+	       {{#tx}}
+	       <a href="./tx?hex={{txid}}">{{txid}}</a><br/>
+	       {{/tx}}
             </div>
          </div>
       </div>
