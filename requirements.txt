@@ -18,7 +18,7 @@ idna==2.8
 itsdangerous==1.1.0
 Jinja2==2.10.1
 MarkupSafe==1.1.1
-Pillow==6.2.2
+Pillow==8.1.1
 pystache==0.5.4
 qrcode==6.1
 requests==2.21.0
